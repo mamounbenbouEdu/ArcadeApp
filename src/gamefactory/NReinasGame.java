@@ -2,6 +2,8 @@ package gamefactory;
 
 import javax.swing.*;
 import java.awt.*;
+import persistence.Resultado;
+import persistence.ResultadoDAO;
 
 public class NReinasGame implements Game {
     private JPanel mainPanel;
@@ -13,7 +15,6 @@ public class NReinasGame implements Game {
     public JPanel getGamePanel() {
         mainPanel = new JPanel(new BorderLayout());
 
-        // Panel superior con entrada y botón
         JPanel topPanel = new JPanel();
         topPanel.add(new JLabel("Tamaño del tablero (N):"));
         inputField = new JTextField("8", 5);
@@ -23,7 +24,6 @@ public class NReinasGame implements Game {
 
         mainPanel.add(topPanel, BorderLayout.NORTH);
 
-        // Panel donde se dibuja el tablero
         boardPanel = new JPanel();
         mainPanel.add(boardPanel, BorderLayout.CENTER);
 
@@ -32,8 +32,13 @@ public class NReinasGame implements Game {
                 int n = Integer.parseInt(inputField.getText());
                 int[] solution = solveNQueens(n);
                 drawBoard(n, solution);
+
+                boolean resuelto = solution != null;
+                Resultado res = new Resultado("N Reinas", "N = " + n, resuelto, n);
+                ResultadoDAO.guardar(res);
+
             } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(mainPanel, "Por favor, introduce un número válido.");
+                JOptionPane.showMessageDialog(mainPanel, "Introduce un número válido.");
             }
         });
 
@@ -49,7 +54,7 @@ public class NReinasGame implements Game {
                 JPanel cell = new JPanel();
                 cell.setBorder(BorderFactory.createLineBorder(Color.BLACK));
                 if (solution != null && solution[row] == col) {
-                    cell.add(new JLabel("♛")); // Reina
+                    cell.add(new JLabel("♛"));
                 }
                 boardPanel.add(cell);
             }
@@ -59,20 +64,14 @@ public class NReinasGame implements Game {
         boardPanel.repaint();
     }
 
-    // Algoritmo de backtracking
     private int[] solveNQueens(int n) {
-        int[] queens = new int[n]; // queens[i] = columna de la reina en fila i
-        if (placeQueen(queens, 0, n)) {
-            return queens;
-        } else {
-            JOptionPane.showMessageDialog(mainPanel, "No se encontró solución.");
-            return null;
-        }
+        int[] queens = new int[n];
+        if (placeQueen(queens, 0, n)) return queens;
+        return null;
     }
 
     private boolean placeQueen(int[] queens, int row, int n) {
         if (row == n) return true;
-
         for (int col = 0; col < n; col++) {
             if (isSafe(queens, row, col)) {
                 queens[row] = col;

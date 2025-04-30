@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import persistence.Resultado;
+import persistence.ResultadoDAO;
 
 public class HanoiGame implements Game {
     private JPanel mainPanel;
@@ -33,16 +35,21 @@ public class HanoiGame implements Game {
             try {
                 int n = Integer.parseInt(inputField.getText());
                 if (n < 1 || n > 8) {
-                    JOptionPane.showMessageDialog(mainPanel, "Por favor, ingresa un número entre 1 y 8.");
+                    JOptionPane.showMessageDialog(mainPanel, "Ingresa un número entre 1 y 8.");
                     return;
                 }
+
                 resultArea.setText("");
                 List<String> pasos = new ArrayList<>();
                 hanoi(n, "A", "C", "B", pasos);
-                for (String paso : pasos) {
-                    resultArea.append(paso + "\n");
-                }
-                resultArea.append("\nTotal de movimientos: " + (int)(Math.pow(2, n) - 1));
+                for (String paso : pasos) resultArea.append(paso + "\n");
+
+                int totalMov = (int) Math.pow(2, n) - 1;
+                resultArea.append("\nTotal de movimientos: " + totalMov);
+
+                Resultado res = new Resultado("Hanoi", "Discos = " + n, true, totalMov);
+                ResultadoDAO.guardar(res);
+
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(mainPanel, "Introduce un número válido.");
             }

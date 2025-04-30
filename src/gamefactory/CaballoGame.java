@@ -2,6 +2,8 @@ package gamefactory;
 
 import javax.swing.*;
 import java.awt.*;
+import persistence.Resultado;
+import persistence.ResultadoDAO;
 
 public class CaballoGame implements Game {
     private JPanel mainPanel;
@@ -32,6 +34,12 @@ public class CaballoGame implements Game {
                 int n = Integer.parseInt(inputField.getText());
                 int[][] solution = solveKnightTour(n);
                 drawBoard(n, solution);
+
+                boolean resuelto = solution != null;
+                int pasos = resuelto ? n * n : 0;
+                Resultado res = new Resultado("Caballo", "Tablero N = " + n, resuelto, pasos);
+                ResultadoDAO.guardar(res);
+
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(mainPanel, "Introduce un número válido.");
             }
@@ -62,17 +70,12 @@ public class CaballoGame implements Game {
     private int[][] solveKnightTour(int n) {
         int[][] board = new int[n][n];
         board[0][0] = 1;
-        if (solve(board, 0, 0, 2, n)) {
-            return board;
-        } else {
-            JOptionPane.showMessageDialog(mainPanel, "No se encontró solución.");
-            return null;
-        }
+        if (solve(board, 0, 0, 2, n)) return board;
+        return null;
     }
 
     private boolean solve(int[][] board, int x, int y, int move, int n) {
         if (move > n * n) return true;
-
         for (int i = 0; i < 8; i++) {
             int nx = x + dx[i];
             int ny = y + dy[i];
